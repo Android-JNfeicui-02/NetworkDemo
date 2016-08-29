@@ -1,1 +1,1 @@
-include ':app', ':networktest'
+include ':app', ':networktest', ':okhttpdemo', ':gsondemo'

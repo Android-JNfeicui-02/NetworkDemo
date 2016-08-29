@@ -6,12 +6,18 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -20,6 +26,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     String method     = "getMemberBySex?";
     private Button mBtnGet;
     private Button mBtnPost;
+    List<Person> mData;
 
     private static final String TAG = "MainActivity";
 
@@ -34,13 +41,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mBtnGet.setOnClickListener(this);
         mBtnPost.setOnClickListener(this);
 
+        mData = new ArrayList<>();
+
     }
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btn_get:
-                doGet("boy");
+                doGet("");
                 break;
 
             case R.id.btn_post:
@@ -126,6 +135,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         reader.close();
                         connection.disconnect();
                         Log.d(TAG, "StringBuilder: " + builder.toString());
+                        String json = builder.toString();
+                        parseJson(json);
                     } else {
                         Log.d(TAG, "联网请求失败");
                     }
@@ -135,5 +146,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
             }
         }.start();
+    }
+
+    private void parseJson(String json) {
+        try {
+            JSONObject jsonObject = new JSONObject(json);
+            JSONArray jsonArray = jsonObject.getJSONArray("list");
+
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject object = jsonArray.getJSONObject(i);
+                Person person = new Person();
+                person.setName(object.getString("name"));
+                person.setSex(object.getString("sex"));
+                mData.add(person);
+            }
+
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        for (Person person : mData) {
+            Log.d(TAG, "parseJson: "+ person.toString());
+        }
+
     }
 }
